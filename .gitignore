@@ -23,8 +23,9 @@
 hs_err_pid*
 replay_pid*
 
-# target and uploads
+# target and uploads and env
 
 target/
 uploads/
 .idea
+.env
