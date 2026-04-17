@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: petfinder
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:buchi}
+    username: ${DB_USERNAME:buchi}
+    password: ${DB_PASSWORD:buchi}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 50MB
+
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  dogapi:
+    api-key: ${DOG_API_KEY:}
+    base-url: ${DOG_API_BASE_URL:https://api.thedogapi.com/v1}
+  photo:
+    upload-dir: ${PHOTO_UPLOAD_DIR:./uploads/pets}
+
+logging:
+  level:
+    com.buchi.petfinder: DEBUG
