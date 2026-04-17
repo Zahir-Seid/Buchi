@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: buchi-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-buchi}
+      POSTGRES_USER: ${POSTGRES_USER:-buchi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-buchi}
+    ports:
+      - "${POSTGRES_EXT_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-buchi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVER_PORT: ${SERVER_PORT:-8080}
+    container_name: buchi-app
+    environment:
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_INTERNAL_PORT:-5432}
+      DB_NAME: ${DB_NAME:-buchi}
+      DB_USERNAME: ${DB_USERNAME:-buchi}
+      DB_PASSWORD: ${DB_PASSWORD:-buchi}
+      SERVER_PORT: ${SERVER_PORT:-8080}
+      PHOTO_UPLOAD_DIR: ${PHOTO_UPLOAD_DIR:-/app/uploads/pets}
+      # Set these in production
+      DOG_API_KEY: ${DOG_API_KEY:-}
+    ports:
+      - "${APP_EXT_PORT:-8080}:${SERVER_PORT:-8080}"
+    volumes:
+      - photo-uploads:/app/uploads/pets
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${SERVER_PORT:-8080}/swagger-ui/index.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  postgres-data:
+  photo-uploads:
