@@ -51,22 +51,12 @@ class PetControllerIntegrationTest {
 
     @Test
     void createPet_success() throws Exception {
-        String petJson = """
-                {
-                    "type": "Dog",
-                    "gender": "male",
-                    "size": "small",
-                    "age": "baby",
-                    "goodWithChildren": true
-                }
-                """;
-
-        MockMultipartFile data = new MockMultipartFile(
-                "data", "", "application/json", petJson.getBytes()
-        );
-
         mockMvc.perform(multipart("/api/create_pet")
-                        .file(data)
+                        .param("type", "Dog")
+                        .param("gender", "male")
+                        .param("size", "small")
+                        .param("age", "baby")
+                        .param("goodWithChildren", "true")
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
@@ -75,25 +65,33 @@ class PetControllerIntegrationTest {
 
     @Test
     void createPet_missingFields() throws Exception {
-        String petJson = """
-                {
-                    "type": "Dog"
-                }
-                """;
-
-        MockMultipartFile data = new MockMultipartFile(
-                "data", "", "application/json", petJson.getBytes()
-        );
-
         mockMvc.perform(multipart("/api/create_pet")
-                        .file(data)
+                        .param("type", "Dog") // missing required fields
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
+    void createPet_withPhoto() throws Exception {
+        MockMultipartFile photo = new MockMultipartFile(
+                "photo",
+                "dog.jpg",
+                MediaType.IMAGE_JPEG_VALUE,
+                "fake-image".getBytes()
+        );
+
+        mockMvc.perform(multipart("/api/create_pet")
+                        .file(photo)
+                        .param("type", "Dog")
+                        .param("gender", "male")
+                        .param("size", "small")
+                        .param("age", "baby")
+                        .param("goodWithChildren", "true"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void getPets_success() throws Exception {
-        // Create a pet first
         Pet pet = Pet.builder()
                 .type("Dog")
                 .gender("male")

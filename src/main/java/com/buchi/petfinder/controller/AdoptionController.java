@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -42,11 +44,24 @@ public class AdoptionController {
     @GetMapping("/get_adoption_requests")
     @Operation(summary = "Get adoption requests", description = "Fetch adoption requests in a date range")
     public ResponseEntity<ApiResponse<List<AdoptionResponse>>> getAdoptionRequests(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from_date,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to_date) {
+
+            @Parameter(description = "Start date", example = "2026-04-12")
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @io.swagger.v3.oas.annotations.media.Schema(type = "string", format = "date")
+            LocalDate from_date,
+
+            @Parameter(description = "End date", example = "2026-04-17")
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @io.swagger.v3.oas.annotations.media.Schema(type = "string", format = "date")
+            LocalDate to_date
+    ) {
 
         log.info("Fetching adoption requests from {} to {}", from_date, to_date);
-        List<AdoptionResponse> requests = adoptionService.getAdoptionRequests(from_date, to_date);
+
+        List<AdoptionResponse> requests =
+                adoptionService.getAdoptionRequests(from_date, to_date);
 
         return ResponseEntity.ok(ApiResponse.success(requests));
     }

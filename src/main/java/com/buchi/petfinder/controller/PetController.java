@@ -35,10 +35,12 @@ public class PetController {
     @PostMapping(value = "/create_pet", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Create a new pet", description = "Creates a new pet and stores it in the local database")
     public ResponseEntity<ApiResponse<CreatePetResponse>> createPet(
-            @Parameter(description = "Pet details") @RequestPart("data") @Valid CreatePetRequest request,
-            @Parameter(description = "Pet photos") @RequestPart(value = "photo", required = false) List<MultipartFile> photos) {
+            @ModelAttribute @Valid CreatePetRequest request,
+            @Parameter(description = "Pet photos")
+            @RequestPart(value = "photo", required = false) List<MultipartFile> photos) {
 
         log.info("Creating new pet: {}", request.getType());
+
         Pet pet = petService.createPet(request, photos);
 
         CreatePetResponse response = CreatePetResponse.builder()
